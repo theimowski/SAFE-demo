@@ -62,17 +62,24 @@ let field lbl input =
         [ str lbl ]
       input ]
 
+let imgSrc = "https://crossweb.pl/upload/gallery/cycles/11255/300x300/lambda_days.png"
+
 let view model dispatch =
   div []
-    [ Navbar.navbar [ Navbar.customClass "is-primary" ]
-        [ Navbar.item_div [ ]
-            [ Heading.h2 [ ]
-                [ str "SAFE Template" ] ] ]
-
-      Container.container [ ]
-        [ form []
-            [ field "Name" (Input.input [ Input.typeIsText ])
-              field "Comment (optional)" (Textarea.textarea [ ] [ ])
+    [ Hero.hero [ Hero.isFullHeight ]
+        [ Hero.body [ ]
+            [ Container.container [ ]
+                [ Columns.columns [ Columns.isCentered ] 
+                    [ Image.image [ Image.is128x128 ]
+                        [ img [ Src imgSrc ] ] ]
+                  
+                  Heading.h2 [ ] [ str "How did you like my talk?" ]
+                  
+                  form []
+                    [ field "Name" (Input.input [ Input.typeIsText ])
+                      field "Comment (optional)" (Textarea.textarea [ ] [ ])
+                    ]
+                ]
             ]
         ]
     ]
