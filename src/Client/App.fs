@@ -14,6 +14,7 @@ open Fulma.Layouts
 open Fulma.Elements
 open Fulma.Components
 open Fulma.BulmaClasses
+open Fulma.Elements.Form
 
 type Model = Counter option
 
@@ -44,29 +45,6 @@ let update msg (model : Model) =
     | _ -> None
   model', Cmd.none
 
-let safeComponents =
-  let intersperse sep ls =
-    List.foldBack (fun x -> function
-      | [] -> [x]
-      | xs -> x::sep::xs) ls []
-
-  let components =
-    [ 
-      "Suave.IO", "http://suave.io" 
-      "Fable"   , "http://fable.io"
-      "Elmish"  , "https://fable-elmish.github.io/"
-      "Fulma"   , "https://mangelmaxime.github.io/Fulma" 
-      "Fable.Remoting", "https://github.com/Zaid-Ajaj/Fable.Remoting"
-    ]
-    |> List.map (fun (desc,link) -> a [ Href link ] [ str desc ] )
-    |> intersperse (str ", ")
-    |> span [ ]
-
-  p [ ]
-    [ strong [] [ str "SAFE Template" ]
-      str " powered by: "
-      components ]
-
 let show = function
 | Some x -> string x
 | None -> "Loading..."
@@ -78,6 +56,12 @@ let button txt onClick =
       Button.onClick onClick ] 
     [ str txt ]
 
+let field lbl input =
+  Field.field_div [ ]
+    [ Label.label [ ]
+        [ str lbl ]
+      input ]
+
 let view model dispatch =
   div []
     [ Navbar.navbar [ Navbar.customClass "is-primary" ]
@@ -85,16 +69,13 @@ let view model dispatch =
             [ Heading.h2 [ ]
                 [ str "SAFE Template" ] ] ]
 
-      Container.container []
-        [ Content.content [ Content.customClass Bulma.Level.Item.HasTextCentered ] 
-            [ Heading.h3 [] [ str ("Press buttons to manipulate counter: " + show model) ] ]
-          Columns.columns [] 
-            [ Column.column [] [ button "-" (fun _ -> dispatch Decrement) ]
-              Column.column [] [ button "+" (fun _ -> dispatch Increment) ] ] ]
-    
-      Footer.footer [ ]
-        [ Content.content [ Content.customClass Bulma.Level.Item.HasTextCentered ]
-            [ safeComponents ] ] ]
+      Container.container [ ]
+        [ form []
+            [ field "Name" (Input.input [ Input.typeIsText ])
+              field "Comment (optional)" (Textarea.textarea [ ] [ ])
+            ]
+        ]
+    ]
   
 #if DEBUG
 open Elmish.Debug
