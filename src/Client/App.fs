@@ -15,16 +15,25 @@ open Fulma.Elements
 open Fulma.Components
 open Fulma.BulmaClasses
 open Fulma.Elements.Form
+open Fulma.Extra.FontAwesome
+
+type Overall =
+| Good
+| SoSo
+| Poor
 
 type Model =
-  { Anonymous : bool }
+  { Anonymous : bool
+    Overall   : Overall option }
 
 type Msg =
 | MakeAnonymous of bool
+| ChooseOverall of Overall
 
 let init () = 
   let model =
-    { Anonymous = false }
+    { Anonymous = false
+      Overall   = None }
   let cmd =
     let routeBuilder typeName methodName = 
       sprintf "/api/%s/%s" typeName methodName
@@ -36,6 +45,7 @@ let update msg (model : Model) =
   let model' =
     match msg with
     | MakeAnonymous flag -> { model with Anonymous = flag }
+    | ChooseOverall overall -> { model with Overall = Some overall }
   model', Cmd.none
 
 let field lbl input =
@@ -46,6 +56,29 @@ let field lbl input =
 
 let imgSrc = "https://crossweb.pl/upload/gallery/cycles/11255/300x300/lambda_days.png"
 
+let icon = function
+| Good -> Fa.I.SmileO, Button.isSuccess
+| SoSo -> Fa.I.MehO  , Button.isWarning
+| Poor -> Fa.I.FrownO, Button.isDanger
+
+let overall model dispatch =
+  let column overall =
+    let i, option = icon overall
+    Column.column [ ]
+      [ Button.button_a 
+          [ yield option
+            yield Button.onClick (fun _ -> dispatch (ChooseOverall overall))
+            if model.Overall <> Some overall then 
+              yield Button.isOutlined ]
+          [ Icon.faIcon [ ]
+              [ Fa.icon i; Fa.fa3x ] ] ]
+
+  Columns.columns [ ]
+    [ Column.column [ Column.Width.is4 ]
+        [ Columns.columns []
+            [ column Good
+              column SoSo
+              column Poor ] ] ]
 
 let anon model dispatch  =
   let option anonymous =
@@ -73,7 +106,8 @@ let view model dispatch =
                   Heading.h2 [ ] [ str "How did you like my talk?" ]
                   
                   form []
-                    [ yield field "Comment (optional)" (Textarea.textarea [ ] [ ])
+                    [ yield field "Overall impression" (overall model dispatch)
+                      yield field "Comment (optional)" (Textarea.textarea [ ] [ ])
                       yield field "Want to give your name?" (anon model dispatch)
                       if not model.Anonymous then
                         yield field "Name" (Input.input [ Input.typeIsText ])
