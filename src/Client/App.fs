@@ -54,7 +54,7 @@ let field lbl input =
         [ str lbl ]
       input ]
 
-let imgSrc = "https://crossweb.pl/upload/gallery/cycles/11255/300x300/lambda_days.png"
+let imgSrc = "http://fsharp.org/img/logo/fsharp256.png"
 
 let icon = function
 | Good -> Fa.I.SmileO, Button.isSuccess
