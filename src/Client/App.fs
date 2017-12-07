@@ -16,45 +16,27 @@ open Fulma.Components
 open Fulma.BulmaClasses
 open Fulma.Elements.Form
 
-type Model = Counter option
+type Model =
+  { Anonymous : bool }
 
 type Msg =
-| Increment
-| Decrement
-| Init of Result<Counter, exn>
+| MakeAnonymous of bool
 
 let init () = 
-  let model = None
+  let model =
+    { Anonymous = false }
   let cmd =
     let routeBuilder typeName methodName = 
       sprintf "/api/%s/%s" typeName methodName
     let api = Fable.Remoting.Client.Proxy.createWithBuilder<Init> routeBuilder
-    Cmd.ofAsync 
-      api.getCounter
-      () 
-      (Ok >> Init)
-      (Error >> Init)
+    Cmd.none
   model, cmd
 
 let update msg (model : Model) =
   let model' =
-    match model,  msg with
-    | Some x, Increment -> Some (x + 1)
-    | Some x, Decrement -> Some (x - 1)
-    | None, Init (Ok x) -> Some x
-    | _ -> None
+    match msg with
+    | MakeAnonymous flag -> { model with Anonymous = flag }
   model', Cmd.none
-
-let show = function
-| Some x -> string x
-| None -> "Loading..."
-
-let button txt onClick = 
-  Button.button_btn
-    [ Button.isFullWidth
-      Button.isPrimary
-      Button.onClick onClick ] 
-    [ str txt ]
 
 let field lbl input =
   Field.field_div [ ]
@@ -63,6 +45,21 @@ let field lbl input =
       input ]
 
 let imgSrc = "https://crossweb.pl/upload/gallery/cycles/11255/300x300/lambda_days.png"
+
+
+let anon model dispatch  =
+  let option anonymous =
+    Radio.radio [ ]
+      [ Radio.input 
+          [ Radio.Input.name "anon"
+            Radio.Input.props 
+              [ Checked (model.Anonymous = anonymous)
+                OnClick (fun _ -> dispatch (MakeAnonymous anonymous)) ] ]
+        str (if anonymous then "No" else "Yes") ]
+
+  Control.control_div [ ]
+    [ option false
+      option true ]
 
 let view model dispatch =
   div []
@@ -76,8 +73,10 @@ let view model dispatch =
                   Heading.h2 [ ] [ str "How did you like my talk?" ]
                   
                   form []
-                    [ field "Name" (Input.input [ Input.typeIsText ])
-                      field "Comment (optional)" (Textarea.textarea [ ] [ ])
+                    [ yield field "Comment (optional)" (Textarea.textarea [ ] [ ])
+                      yield field "Want to give your name?" (anon model dispatch)
+                      if not model.Anonymous then
+                        yield field "Name" (Input.input [ Input.typeIsText ])
                     ]
                 ]
             ]
