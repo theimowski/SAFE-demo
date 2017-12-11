@@ -22,18 +22,30 @@ type Overall =
 | SoSo
 | Poor
 
+let favs =
+  [ 
+    "Hot Module Replacement"
+    "Time Travel Debugger"
+    "Shared Code"
+    "Server Refresh"
+  ]
+  |> Set.ofList
+
 type Model =
   { Anonymous : bool
-    Overall   : Overall option }
+    Overall   : Overall option
+    Favs      : Set<string> }
 
 type Msg =
 | MakeAnonymous of bool
 | ChooseOverall of Overall
+| ToggleFav     of string
 
 let init () = 
   let model =
     { Anonymous = false
-      Overall   = None }
+      Overall   = None
+      Favs      = Set.empty }
   let cmd =
     let routeBuilder typeName methodName = 
       sprintf "/api/%s/%s" typeName methodName
@@ -41,18 +53,28 @@ let init () =
     Cmd.none
   model, cmd
 
+let toggleFav fav favs =
+  if Set.contains fav favs then
+    Set.remove fav favs
+  else
+    Set.add fav favs
+
 let update msg (model : Model) =
   let model' =
     match msg with
     | MakeAnonymous flag -> { model with Anonymous = flag }
     | ChooseOverall overall -> { model with Overall = Some overall }
+    | ToggleFav fav -> { model with Favs = toggleFav fav model.Favs }
   model', Cmd.none
 
 let field lbl input =
-  Field.field_div [ ]
-    [ Label.label [ ]
-        [ str lbl ]
-      input ]
+  Field.field_div [ Field.isHorizontal ]
+    [ Field.label [ ]
+        [ Label.label [ ]
+            [ str lbl ] ]
+      
+      Field.body [ ]
+        [ input ] ]
 
 let imgSrc = "http://fsharp.org/img/logo/fsharp256.png"
 
@@ -94,23 +116,46 @@ let anon model dispatch  =
     [ option false
       option true ]
 
+let fav model dispatch =
+  Control.control_div [ ]
+    [ Select.select [ Select.customClass "is-multiple" ]
+        [ select [ Multiple true; Size 3. ]
+            [ for f in favs ->
+                option 
+                  [ Value f
+                    OnClick (fun _ -> dispatch (ToggleFav f))
+                    Selected (Set.contains f model.Favs) ] 
+                  [ str f ] ] ] ]
+
+let submit model dispatch =
+  Control.control_div [ ]
+    [ Button.button_btn [ Button.isPrimary ]
+        [ str "Submit" ] ]
+
 let view model dispatch =
   div []
     [ Hero.hero [ Hero.isFullHeight ]
-        [ Hero.body [ ]
+        [ Hero.head [ ]
+            [ Container.container [ ]
+                [ Heading.h2 [ ] [ str "SAFE apps with F# web stack" ]
+                  Heading.h4 [ ] [ str "by Tomasz Heimowski" ] ] ]
+          
+          Hero.body [ ]
             [ Container.container [ ]
                 [ Columns.columns [ Columns.isCentered ] 
                     [ Image.image [ Image.is128x128 ]
                         [ img [ Src imgSrc ] ] ]
                   
-                  Heading.h2 [ ] [ str "How did you like my talk?" ]
+                  Heading.h3 [ ] [ str "How did you like my talk?" ]
                   
                   form []
                     [ yield field "Overall impression" (overall model dispatch)
+                      yield field "Best parts" (fav model dispatch)
                       yield field "Comment (optional)" (Textarea.textarea [ ] [ ])
-                      yield field "Want to give your name?" (anon model dispatch)
+                      yield field "Want to leave name?" (anon model dispatch)
                       if not model.Anonymous then
                         yield field "Name" (Input.input [ Input.typeIsText ])
+                      yield field "" (submit model dispatch)
                     ]
                 ]
             ]
