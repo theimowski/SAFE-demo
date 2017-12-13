@@ -19,11 +19,6 @@ open Fulma.BulmaClasses
 open Fulma.Elements.Form
 open Fulma.Extra.FontAwesome
 
-type Overall =
-| Good
-| SoSo
-| Poor
-
 let favs =
   [ 
     "Hot Module Replacement"
@@ -45,6 +40,11 @@ type Msg =
 | FavsChanged   of string list
 | SetComment    of string
 | SubmitForm
+| VoteSubmitted of Result<VotingResults, exn>
+
+let routeBuilder typeName methodName = 
+  sprintf "/api/%s/%s" typeName methodName
+let api = Fable.Remoting.Client.Proxy.createWithBuilder<Votes> routeBuilder
 
 let init () = 
   let model =
@@ -53,9 +53,6 @@ let init () =
       Favs      = Set.empty
       Comment   = "" }
   let cmd =
-    let routeBuilder typeName methodName = 
-      sprintf "/api/%s/%s" typeName methodName
-    let api = Fable.Remoting.Client.Proxy.createWithBuilder<Init> routeBuilder
     Cmd.none
   model, cmd
 
@@ -65,6 +62,12 @@ let toggleFav fav favs =
   else
     Set.add fav favs
 
+let vote model =
+  { Name     = if model.Anonymous then None else Some ""
+    Overall  = defaultArg model.Overall Good
+    Favs     = model.Favs
+    Comment  = if model.Comment <> "" then Some model.Comment else None }
+
 let update msg (model : Model) =
   let model' =
     match msg with
@@ -72,10 +75,24 @@ let update msg (model : Model) =
     | ChooseOverall overall -> { model with Overall = Some overall }
     | FavsChanged favs -> { model with Favs = Set.ofList favs }
     | SetComment comment -> { model with Comment = comment }
-    | SubmitForm -> 
-      Fable.Import.Browser.console.log "XXX"
+    | SubmitForm -> model
+    | VoteSubmitted (Ok results) ->
+      Fable.Import.Browser.console.log (sprintf "%A" results)
       model
-  model', Cmd.none
+    | VoteSubmitted (Error e) ->
+      Fable.Import.Browser.console.error e
+      model
+  let cmd =
+    match msg with
+    | SubmitForm -> 
+      Cmd.ofAsync 
+        api.sendVote 
+        (vote model)
+        (Ok >> VoteSubmitted)
+        (Error >> VoteSubmitted)
+    | _ ->
+      Cmd.none
+  model', cmd
 
 let field lbl input =
   Field.field_div [ Field.isHorizontal ]
