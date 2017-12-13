@@ -7,6 +7,8 @@ open Fable.Helpers.React
 open Fable.Helpers.React.Props
 open Fable.PowerPack.Fetch
 
+open Fable.Core.JsInterop
+
 open Shared
 
 open Fulma
@@ -39,7 +41,7 @@ type Model =
 type Msg =
 | MakeAnonymous of bool
 | ChooseOverall of Overall
-| ToggleFav     of string
+| FavsChanged   of string list
 
 let init () = 
   let model =
@@ -64,7 +66,7 @@ let update msg (model : Model) =
     match msg with
     | MakeAnonymous flag -> { model with Anonymous = flag }
     | ChooseOverall overall -> { model with Overall = Some overall }
-    | ToggleFav fav -> { model with Favs = toggleFav fav model.Favs }
+    | FavsChanged favs -> { model with Favs = Set.ofList favs }
   model', Cmd.none
 
 let field lbl input =
@@ -109,21 +111,27 @@ let anon model dispatch  =
           [ Radio.Input.name "anon"
             Radio.Input.props 
               [ Checked (model.Anonymous = anonymous)
-                OnClick (fun _ -> dispatch (MakeAnonymous anonymous)) ] ]
+                OnChange (fun _ -> dispatch (MakeAnonymous anonymous)) ] ]
         str (if anonymous then "No" else "Yes") ]
 
   Control.control_div [ ]
     [ option false
       option true ]
 
+let getOptions (f : Fable.Import.React.FormEvent) : string list =
+  !!f.target?options
+  |> List.filter (fun o -> !!o?selected = true)
+  |> List.map (fun o -> !!o?value)
+
 let fav model dispatch =
   Control.control_div [ ]
     [ Select.select [ Select.customClass "is-multiple" ]
-        [ select [ Multiple true; Size 3. ]
+        [ select [ Multiple true
+                   Size 3.
+                   OnChange (getOptions >> FavsChanged >> dispatch) ]
             [ for f in favs ->
                 option 
                   [ Value f
-                    OnClick (fun _ -> dispatch (ToggleFav f))
                     Selected (Set.contains f model.Favs) ] 
                   [ str f ] ] ] ]
 
