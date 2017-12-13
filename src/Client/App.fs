@@ -36,18 +36,22 @@ let favs =
 type Model =
   { Anonymous : bool
     Overall   : Overall option
-    Favs      : Set<string> }
+    Favs      : Set<string>
+    Comment   : string }
 
 type Msg =
 | MakeAnonymous of bool
 | ChooseOverall of Overall
 | FavsChanged   of string list
+| SetComment    of string
+| SubmitForm
 
 let init () = 
   let model =
     { Anonymous = false
       Overall   = None
-      Favs      = Set.empty }
+      Favs      = Set.empty
+      Comment   = "" }
   let cmd =
     let routeBuilder typeName methodName = 
       sprintf "/api/%s/%s" typeName methodName
@@ -67,6 +71,10 @@ let update msg (model : Model) =
     | MakeAnonymous flag -> { model with Anonymous = flag }
     | ChooseOverall overall -> { model with Overall = Some overall }
     | FavsChanged favs -> { model with Favs = Set.ofList favs }
+    | SetComment comment -> { model with Comment = comment }
+    | SubmitForm -> 
+      Fable.Import.Browser.console.log "XXX"
+      model
   model', Cmd.none
 
 let field lbl input =
@@ -131,13 +139,20 @@ let fav model dispatch =
                    OnChange (getOptions >> FavsChanged >> dispatch) ]
             [ for f in favs ->
                 option 
-                  [ Value f
-                    Selected (Set.contains f model.Favs) ] 
+                  [ Value f ] 
                   [ str f ] ] ] ]
+
+let onInput action = OnInput (fun e -> action !!e.target?value) 
+
+let comment model dispatch =
+  Textarea.textarea 
+    [ Textarea.props [ onInput (SetComment >> dispatch) ]
+      Textarea.value model.Comment ] 
+    [ ]
 
 let submit model dispatch =
   Control.control_div [ ]
-    [ Button.button_btn [ Button.isPrimary ]
+    [ Button.button_a [ Button.isPrimary; Button.onClick (fun _ -> dispatch SubmitForm) ]
         [ str "Submit" ] ]
 
 let view model dispatch =
@@ -157,10 +172,10 @@ let view model dispatch =
                   Heading.h3 [ ] [ str "How did you like my talk?" ]
                   
                   form []
-                    [ yield field "Overall impression" (overall model dispatch)
+                    [ yield field "Overall" (overall model dispatch)
                       yield field "Best parts" (fav model dispatch)
-                      yield field "Comment (optional)" (Textarea.textarea [ ] [ ])
-                      yield field "Want to leave name?" (anon model dispatch)
+                      yield field "Comment" (comment model dispatch)
+                      yield field "Leave name?" (anon model dispatch)
                       if not model.Anonymous then
                         yield field "Name" (Input.input [ Input.typeIsText ])
                       yield field "" (submit model dispatch)
