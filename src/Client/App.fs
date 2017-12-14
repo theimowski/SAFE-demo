@@ -187,21 +187,33 @@ let viewResults (results : VotingResults) dispatch =
     [ Container.container [ ]
         [ Columns.columns [ Columns.isCentered ]
             [ Column.column [ ]
-                [ yield Heading.h4 [ ] [ str "Overall" ]
-                  for (overall, cnt) in Map.toList results.Overalls do
-                    let i, _ = icon overall
-                    yield Icon.faIcon [ ]
-                            [ Fa.icon i; Fa.fa3x ]
-                    yield str (sprintf "---> %d" cnt) ]
+                [ Level.level [ ]
+                    [ for (overall, cnt) in Map.toList results.Overalls ->
+                      let i, _ = icon overall              
+                      Level.item [ Level.Item.hasTextCentered ]
+                        [ div [ ]
+                            [ Level.title [ ] [ Icon.faIcon [ ] [ Fa.icon i; Fa.fa2x ] ]
+                              Level.title [ ] [ str (string cnt) ] ] ] ] ]
+                    
               Column.column [ ]
-                [ yield Heading.h4 [ ] [ str "Best parts" ]
-                  for (part, cnt) in Map.toList results.FavsCount |> List.sortByDescending snd do
-                    yield str (sprintf "%s : %d" part cnt)
-                    yield br [ ] ]
-              Column.column [ ]
-                [ yield Heading.h4 [ ] [ str "Comments" ]
-                  for comment in results.Comments |> Array.sortBy (fun x -> x.Length) do
-                    yield str comment ] ] ] ]
+                [ Table.table [ ]
+                    [ thead [ ]
+                        [ tr [ ] 
+                            [ th [ ] [ str "Part" ]
+                              th [ ] [ str "Votes" ] ] ]
+                      tbody [ ]
+                        [ for (part, cnt) in Map.toList results.FavsCount |> List.sortByDescending snd ->
+                          tr [ ]
+                            [ td [ ] [ str part ]
+                              td [ ] [ str (string cnt) ] ] ] ] ] ]
+          Columns.columns [ Columns.isCentered ]
+            [ Column.column [ ]
+                [ Heading.h4 [ ] [ str "Comments" ]
+                  Content.content [ Content.isSmall ]
+                    [ ul [ ]
+                        [ for comment in results.Comments do
+                          yield li [ ] [ str comment ] ] ] ] ] ] ]
+                    
 
 let viewForm model dispatch =
   Hero.body [ ]
