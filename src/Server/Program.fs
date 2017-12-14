@@ -42,6 +42,7 @@ let countResults () =
 let sendVote (vote : Vote) : Async<VotingResults> = 
   async {
     do votes.Add vote
+    do! Async.Sleep 1500
     return countResults ()
   }
 

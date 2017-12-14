@@ -29,10 +29,11 @@ let favs =
   |> Set.ofList
 
 type Model =
-  { Anonymous : bool
-    Overall   : Overall option
-    Favs      : Set<string>
-    Comment   : string }
+  { Anonymous  : bool
+    Overall    : Overall option
+    Favs       : Set<string>
+    Comment    : string
+    Submitting : bool }
 
 type Msg =
 | MakeAnonymous of bool
@@ -48,10 +49,11 @@ let api = Fable.Remoting.Client.Proxy.createWithBuilder<Votes> routeBuilder
 
 let init () = 
   let model =
-    { Anonymous = false
-      Overall   = None
-      Favs      = Set.empty
-      Comment   = "" }
+    { Anonymous  = false
+      Overall    = None
+      Favs       = Set.empty
+      Comment    = ""
+      Submitting = false }
   let cmd =
     Cmd.none
   model, cmd
@@ -75,13 +77,13 @@ let update msg (model : Model) =
     | ChooseOverall overall -> { model with Overall = Some overall }
     | FavsChanged favs -> { model with Favs = Set.ofList favs }
     | SetComment comment -> { model with Comment = comment }
-    | SubmitForm -> model
+    | SubmitForm -> { model with Submitting = true } 
     | VoteSubmitted (Ok results) ->
       Fable.Import.Browser.console.log (sprintf "%A" results)
-      model
+      { model with Submitting = false }
     | VoteSubmitted (Error e) ->
       Fable.Import.Browser.console.error e
-      model
+      { model with Submitting = false }
   let cmd =
     match msg with
     | SubmitForm -> 
@@ -145,7 +147,7 @@ let anon model dispatch  =
 
 let getOptions (f : Fable.Import.React.FormEvent) : string list =
   !!f.target?options
-  |> List.filter (fun o -> !!o?selected = true)
+  |> List.filter (fun o -> !!o?selected)
   |> List.map (fun o -> !!o?value)
 
 let fav model dispatch =
@@ -169,7 +171,10 @@ let comment model dispatch =
 
 let submit model dispatch =
   Control.control_div [ ]
-    [ Button.button_a [ Button.isPrimary; Button.onClick (fun _ -> dispatch SubmitForm) ]
+    [ Button.button_a 
+        [ Button.isPrimary
+          Button.onClick (fun _ -> dispatch SubmitForm)
+          (if model.Submitting then Button.isLoading else Button.isActive) ]
         [ str "Submit" ] ]
 
 let view model dispatch =
