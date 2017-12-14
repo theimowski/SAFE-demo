@@ -33,7 +33,8 @@ type Model =
     Overall    : Overall option
     Favs       : Set<string>
     Comment    : string
-    Submitting : bool }
+    Submitting : bool
+    Results    : VotingResults option }
 
 type Msg =
 | MakeAnonymous of bool
@@ -53,16 +54,11 @@ let init () =
       Overall    = None
       Favs       = Set.empty
       Comment    = ""
-      Submitting = false }
+      Submitting = false
+      Results    = None }
   let cmd =
     Cmd.none
   model, cmd
-
-let toggleFav fav favs =
-  if Set.contains fav favs then
-    Set.remove fav favs
-  else
-    Set.add fav favs
 
 let vote model =
   { Name     = if model.Anonymous then None else Some ""
@@ -73,17 +69,18 @@ let vote model =
 let update msg (model : Model) =
   let model' =
     match msg with
-    | MakeAnonymous flag -> { model with Anonymous = flag }
+    | MakeAnonymous flag    -> { model with Anonymous = flag }
     | ChooseOverall overall -> { model with Overall = Some overall }
-    | FavsChanged favs -> { model with Favs = Set.ofList favs }
-    | SetComment comment -> { model with Comment = comment }
-    | SubmitForm -> { model with Submitting = true } 
-    | VoteSubmitted (Ok results) ->
-      Fable.Import.Browser.console.log (sprintf "%A" results)
-      { model with Submitting = false }
-    | VoteSubmitted (Error e) ->
-      Fable.Import.Browser.console.error e
-      { model with Submitting = false }
+    | FavsChanged favs      -> { model with Favs = Set.ofList favs }
+    | SetComment comment    -> { model with Comment = comment }
+    | SubmitForm            -> { model with Submitting = true } 
+    | VoteSubmitted result  ->
+      match result with
+      | Ok results ->
+        { model with Submitting = false; Results = Some results }
+      | Error e ->
+        Fable.Import.Browser.console.error e
+        { model with Submitting = false }
   let cmd =
     match msg with
     | SubmitForm -> 
@@ -185,6 +182,48 @@ let submit model dispatch =
             yield Button.isLoading ]
         [ str "Submit" ] ]
 
+let viewResults (results : VotingResults) dispatch =
+  Hero.body [ ] 
+    [ Container.container [ ]
+        [ Columns.columns [ Columns.isCentered ]
+            [ Column.column [ ]
+                [ yield Heading.h4 [ ] [ str "Overall" ]
+                  for (overall, cnt) in Map.toList results.Overalls do
+                    let i, _ = icon overall
+                    yield Icon.faIcon [ ]
+                            [ Fa.icon i; Fa.fa3x ]
+                    yield str (sprintf "---> %d" cnt) ]
+              Column.column [ ]
+                [ yield Heading.h4 [ ] [ str "Best parts" ]
+                  for (part, cnt) in Map.toList results.FavsCount |> List.sortByDescending snd do
+                    yield str (sprintf "%s : %d" part cnt)
+                    yield br [ ] ]
+              Column.column [ ]
+                [ yield Heading.h4 [ ] [ str "Comments" ]
+                  for comment in results.Comments |> Array.sortBy (fun x -> x.Length) do
+                    yield str comment ] ] ] ]
+
+let viewForm model dispatch =
+  Hero.body [ ]
+    [ Container.container [ ]
+        [ Columns.columns [ Columns.isCentered ] 
+            [ Image.image [ Image.is128x128 ]
+                [ img [ Src imgSrc ] ] ]
+          
+          Heading.h3 [ ] [ str "How did you like my talk?" ]
+          
+          form []
+            [ yield field "Overall" (overall model dispatch)
+              yield field "Best parts" (fav model dispatch)
+              yield field "Comment" (comment model dispatch)
+              yield field "Leave name?" (anon model dispatch)
+              if not model.Anonymous then
+                yield field "Name" (Input.input [ Input.typeIsText ])
+              yield field "" (submit model dispatch)
+            ]
+        ]
+    ]
+
 let view model dispatch =
   div []
     [ Hero.hero [ Hero.isFullHeight ]
@@ -193,25 +232,9 @@ let view model dispatch =
                 [ Heading.h2 [ ] [ str "SAFE apps with F# web stack" ]
                   Heading.h4 [ ] [ str "by Tomasz Heimowski" ] ] ]
           
-          Hero.body [ ]
-            [ Container.container [ ]
-                [ Columns.columns [ Columns.isCentered ] 
-                    [ Image.image [ Image.is128x128 ]
-                        [ img [ Src imgSrc ] ] ]
-                  
-                  Heading.h3 [ ] [ str "How did you like my talk?" ]
-                  
-                  form []
-                    [ yield field "Overall" (overall model dispatch)
-                      yield field "Best parts" (fav model dispatch)
-                      yield field "Comment" (comment model dispatch)
-                      yield field "Leave name?" (anon model dispatch)
-                      if not model.Anonymous then
-                        yield field "Name" (Input.input [ Input.typeIsText ])
-                      yield field "" (submit model dispatch)
-                    ]
-                ]
-            ]
+          (match model.Results with
+          | Some results -> viewResults results dispatch
+          | None         -> viewForm model dispatch)
         ]
     ]
   
