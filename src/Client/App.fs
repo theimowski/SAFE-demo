@@ -112,12 +112,16 @@ let icon = function
 | SoSo -> Fa.I.MehO  , Button.isWarning
 | Poor -> Fa.I.FrownO, Button.isDanger
 
+
+let onInput action = OnInput (fun e -> action !!e.target?value) 
+
 let overall model dispatch =
   let column overall =
     let i, option = icon overall
     Column.column [ ]
       [ Button.button_a 
           [ yield option
+            yield Button.props [ Disabled model.Submitting ]
             yield Button.onClick (fun _ -> dispatch (ChooseOverall overall))
             if model.Overall <> Some overall then 
               yield Button.isOutlined ]
@@ -138,6 +142,7 @@ let anon model dispatch  =
           [ Radio.Input.name "anon"
             Radio.Input.props 
               [ Checked (model.Anonymous = anonymous)
+                Disabled model.Submitting
                 OnChange (fun _ -> dispatch (MakeAnonymous anonymous)) ] ]
         str (if anonymous then "No" else "Yes") ]
 
@@ -155,26 +160,29 @@ let fav model dispatch =
     [ Select.select [ Select.customClass "is-multiple" ]
         [ select [ Multiple true
                    Size 3.
+                   Disabled model.Submitting
                    OnChange (getOptions >> FavsChanged >> dispatch) ]
             [ for f in favs ->
                 option 
                   [ Value f ] 
                   [ str f ] ] ] ]
 
-let onInput action = OnInput (fun e -> action !!e.target?value) 
-
 let comment model dispatch =
   Textarea.textarea 
-    [ Textarea.props [ onInput (SetComment >> dispatch) ]
-      Textarea.value model.Comment ] 
+    [ Textarea.props 
+        [ onInput (SetComment >> dispatch)
+          Disabled model.Submitting ]
+      Textarea.value model.Comment ]
     [ ]
 
 let submit model dispatch =
   Control.control_div [ ]
     [ Button.button_a 
-        [ Button.isPrimary
-          Button.onClick (fun _ -> dispatch SubmitForm)
-          (if model.Submitting then Button.isLoading else Button.isActive) ]
+        [ yield Button.isPrimary
+          yield Button.props [ Disabled model.Submitting ]
+          yield Button.onClick (fun _ -> dispatch SubmitForm)
+          if model.Submitting then
+            yield Button.isLoading ]
         [ str "Submit" ] ]
 
 let view model dispatch =
