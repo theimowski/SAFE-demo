@@ -7,6 +7,7 @@ open Suave
 open Suave.Operators
 
 open Shared
+open Suave.RequestErrors
 
 let path = Path.Combine("..","Client") |> Path.GetFullPath 
 let port = 8085us
@@ -57,6 +58,7 @@ let webPart =
   choose [
     init
     Files.browseHome
+    NOT_FOUND "woops"
   ]
 
 startWebServer config webPart

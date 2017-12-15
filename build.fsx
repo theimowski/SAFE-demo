@@ -4,6 +4,7 @@ open System
 
 open Fake
 
+let deployDir = "./deploy"
 let serverPath = "./src/Server" |> FullName
 let serverProj = serverPath </> "Server.fsproj"
 let clientPath = "./src/Client" |> FullName
@@ -19,6 +20,10 @@ let yarnTool = platformTool "yarn" "yarn.cmd"
 
 let mutable dotnetCli = "dotnet"
 
+let dockerUser = environVar "DOCKER_HUB_USER"
+let dockerPassword = environVar "DOCKER_HUB_PASSWORD"
+let dockerImageName = "safe-demo"
+
 let run cmd args workingDir =
   let result =
     ExecProcess (fun info ->
@@ -27,7 +32,9 @@ let run cmd args workingDir =
       info.Arguments <- args) TimeSpan.MaxValue
   if result <> 0 then failwithf "'%s %s' failed" cmd args
 
-Target "Clean" DoNothing
+Target "Clean" (fun _ ->
+  CleanDirs [ deployDir ]
+)
 
 Target "InstallDotNetCore" (fun _ ->
   dotnetCli <- DotNetCli.InstallDotNetSDK "2.0.3"
@@ -69,10 +76,48 @@ Target "Run" (fun () ->
   |> ignore
 )
 
+Target "Bundle" (fun _ ->
+    let result =
+        ExecProcess (fun info ->
+            info.FileName <- dotnetCli
+            info.WorkingDirectory <- serverPath
+            info.Arguments <- "publish -c Release -o \"" + FullName (deployDir </> "Server") + "\"") TimeSpan.MaxValue
+    if result <> 0 then failwith "Publish failed"
+
+    let clientDir = deployDir </> "Client"
+    let publicDir = clientDir </> "public"
+    let jsDir = clientDir </> "js"
+    let cssDir = clientDir </> "css"
+    let imageDir = clientDir </> "Images"
+
+    !! "src/Client/public/**/*.*" |> CopyFiles publicDir
+    !! "src/Client/js/**/*.*" |> CopyFiles jsDir
+    !! "src/Client/css/**/*.*" |> CopyFiles cssDir
+    !! "src/Client/Images/**/*.*" |> CopyFiles imageDir
+
+    "src/Client/index.html" |> CopyFile clientDir
+)
+
+Target "CreateDockerImage" (fun _ ->
+    if String.IsNullOrEmpty dockerUser then
+        failwithf "docker username not given."
+    if String.IsNullOrEmpty dockerImageName then
+        failwithf "docker image Name not given."
+    let result =
+        ExecProcess (fun info ->
+            info.FileName <- "docker"
+            info.UseShellExecute <- false
+            info.Arguments <- sprintf "build -t %s/%s ." dockerUser dockerImageName) TimeSpan.MaxValue
+    if result <> 0 then failwith "Docker build failed"
+)
+
 "Clean"
   ==> "InstallDotNetCore"
   ==> "InstallClient"
   ==> "Build"
+
+"Bundle"
+  ==> "CreateDockerImage"
 
 "InstallClient"
   ==> "RestoreServer"
