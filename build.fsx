@@ -23,6 +23,7 @@ let mutable dotnetCli = "dotnet"
 let dockerUser = environVar "DOCKER_HUB_USER"
 let dockerPassword = environVar "DOCKER_HUB_PASSWORD"
 let dockerImageName = "safe-demo"
+let dockerLoginServer = "docker.io"
 
 let run cmd args workingDir =
   let result =
@@ -109,6 +110,29 @@ Target "CreateDockerImage" (fun _ ->
             info.UseShellExecute <- false
             info.Arguments <- sprintf "build -t %s/%s ." dockerUser dockerImageName) TimeSpan.MaxValue
     if result <> 0 then failwith "Docker build failed"
+    
+    let result =
+        ExecProcess (fun info ->
+            info.FileName <- "docker"
+            info.Arguments <- sprintf "tag %s/%s %s/%s" dockerUser dockerImageName dockerUser dockerImageName) TimeSpan.MaxValue
+    if result <> 0 then failwith "Docker tag failed"
+)
+
+
+Target "Deploy" (fun _ ->
+    let result =
+        ExecProcess (fun info ->
+            info.FileName <- "docker"
+            info.WorkingDirectory <- deployDir
+            info.Arguments <- sprintf "login --username \"%s\" --password \"%s\"" dockerUser dockerPassword) TimeSpan.MaxValue
+    if result <> 0 then failwith "Docker login failed"
+
+    let result =
+        ExecProcess (fun info ->
+            info.FileName <- "docker"
+            info.WorkingDirectory <- deployDir
+            info.Arguments <- sprintf "push %s/%s" dockerUser dockerImageName) TimeSpan.MaxValue
+    if result <> 0 then failwith "Docker push failed"
 )
 
 "Clean"
@@ -118,6 +142,7 @@ Target "CreateDockerImage" (fun _ ->
 
 "Bundle"
   ==> "CreateDockerImage"
+  ==> "Deploy"
 
 "InstallClient"
   ==> "RestoreServer"
