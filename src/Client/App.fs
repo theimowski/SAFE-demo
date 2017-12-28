@@ -17,6 +17,8 @@ open Fulma.Components
 open Fulma.BulmaClasses
 open Fulma.BulmaClasses.Bulma.Properties
 open Fulma.Elements.Form
+open Fulma.BulmaClasses.Bulma
+open System.ComponentModel
 
 type Model = Counter option
 
@@ -61,26 +63,29 @@ let field input =
         [ input ] ]
 
 module Fields =
-  let icon = function
-  | Good -> Fa.I.SmileO, Button.isSuccess
-  | SoSo -> Fa.I.MehO  , Button.isWarning
-  | Poor -> Fa.I.FrownO, Button.isDanger
+  let overallFA = function
+  | Good -> Fa.I.SmileO
+  | SoSo -> Fa.I.MehO
+  | Poor -> Fa.I.FrownO
 
+  let overallColor = function
+  | Good -> Button.isSuccess
+  | SoSo -> Button.isWarning
+  | Poor -> Button.isDanger
 
   let column overall =
-    let i, option = icon overall
     Level.item [ ]
       [ Button.button_a 
-          [ yield option ]
+          [ overallColor overall
+            Button.isOutlined ]
           [ Icon.faIcon [ ]
-              [ Fa.icon i; Fa.fa2x ] ] ]
+              [ Fa.icon (overallFA overall); Fa.fa2x ] ] ]
 
   let overall =
-    Level.level [ ]
+    Level.level [ Level.Level.isMobile ]
       [ column Good
         column SoSo
         column Poor ]
-
 
   let comment =
     Textarea.textarea [ Textarea.placeholder "Comment" ] []
@@ -100,11 +105,19 @@ let viewForm model dispatch =
       field Fields.submit
       ]
 
+let imgSrc = "http://fsharp.org/img/logo/fsharp256.png"
+
 let viewBody model dispatch =
   Container.container [ Container.customClass Alignment.HasTextCentered ]
     [ Column.column [ Column.Width.is6; Column.Offset.is3 ]
-        [ Heading.h3 [ Heading.isSubtitle ]
-            [ str "Score my talk" ]
+        [ Level.level [ ]
+            [ Level.item [ ]
+                [ Image.image [Image.is64x64 ]
+                    [ img [ Src imgSrc ] ] ] ]
+          Heading.h2 [ ]
+            [ str "SAFE Demo" ]
+          Heading.h3 [ ]
+            [ str "Score the talk" ]
           Box.box' []
             [ viewForm model dispatch ] ] ]
 
