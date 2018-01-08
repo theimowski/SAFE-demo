@@ -97,9 +97,12 @@ let field input =
     [ Field.body [ ] 
         [ input ] ]
 
+let comment =
+  Textarea.textarea [ Textarea.placeholder "Comment" ] [ ]
+
 let containerBox model dispatch =
   Box.box' [ ]
-    [ ]
+    [ field comment ]
 
 let imgSrc = "http://fsharp.org/img/logo/fsharp256.png"
 
