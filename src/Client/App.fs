@@ -56,30 +56,6 @@ let update msg (model : Model) =
     | _ -> None
   model', Cmd.none
 
-let safeComponents =
-  let intersperse sep ls =
-    List.foldBack (fun x -> function
-      | [] -> [x]
-      | xs -> x::sep::xs) ls []
-
-  let components =
-    [
-      "Suave", "http://suave.io"
-      "Fable", "http://fable.io"
-      "Elmish", "https://fable-elmish.github.io/"
-      "Fulma", "https://mangelmaxime.github.io/Fulma" 
-      "Bulma\u00A0Templates", "https://dansup.github.io/bulma-templates/"
-      "Fable.Remoting", "https://github.com/Zaid-Ajaj/Fable.Remoting"
-    ]
-    |> List.map (fun (desc,link) -> a [ Href link ] [ str desc ] )
-    |> intersperse (str ", ")
-    |> span [ ]
-
-  p [ ]
-    [ strong [] [ str "SAFE Template" ]
-      str " powered by: "
-      components ]
-
 let show = function
 | Some x -> string x
 | None -> "Loading..."
@@ -134,6 +110,8 @@ let containerBox model dispatch =
                   Button.onClick (fun _ -> dispatch Decrement) ]
                 [ str "-" ] ] ] ]
 
+let imgSrc = "http://fsharp.org/img/logo/fsharp256.png"
+
 let view model dispatch =
   Hero.hero [ Hero.isPrimary; Hero.isFullHeight ] 
     [ Hero.head [ ] 
@@ -147,10 +125,14 @@ let view model dispatch =
             [ Column.column 
                 [ Column.Width.is6
                   Column.Offset.is3 ]
-                [ h1 [ ClassName "title" ] 
-                    [ str "SAFE Template" ]
+                [ Level.level [ ]
+                    [ Level.item [ ] 
+                        [ Image.image [ Image.is64x64 ]
+                            [ img [ Src imgSrc ] ] ] ]
+                  h1 [ ClassName "title" ] 
+                    [ str "SAFE Demo" ]
                   div [ ClassName "subtitle" ]
-                    [ safeComponents ]
+                    [ str "Score my talk" ]
                   containerBox model dispatch ] ] ] ]
 
   
