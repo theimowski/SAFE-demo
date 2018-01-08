@@ -100,9 +100,17 @@ let field input =
 let comment =
   Textarea.textarea [ Textarea.placeholder "Comment" ] [ ]
 
+let name =
+  Input.input [ Input.typeIsText; Input.placeholder "Name" ]
+
+let submit =
+  Button.button_a [ Button.isPrimary ] [ str "Submit" ]
+
 let containerBox model dispatch =
   Box.box' [ ]
-    [ field comment ]
+    [ field comment
+      field name
+      field submit ]
 
 let imgSrc = "http://fsharp.org/img/logo/fsharp256.png"
 
