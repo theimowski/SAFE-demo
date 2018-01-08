@@ -104,7 +104,7 @@ let name =
   Input.input [ Input.typeIsText; Input.placeholder "Name" ]
 
 let submit =
-  Button.button_a [ Button.isPrimary ] [ str "Submit" ]
+  Button.button_a [ Button.isPrimary; Button.isFullWidth ] [ str "Submit" ]
 
 let containerBox model dispatch =
   Box.box' [ ]
