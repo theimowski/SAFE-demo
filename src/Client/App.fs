@@ -20,13 +20,20 @@ open Fulma.BulmaClasses.Bulma
 open Fulma.BulmaClasses.Bulma.Properties
 open Fulma.Extra.FontAwesome
 
-type Model = Counter option
+type Score =
+| Poor
+| SoSo
+| Good
+
+type Model =
+  { Score   : Score 
+    Name    : string 
+    Comment : string }
 
 type Msg =
-| Increment
-| Decrement
-| Init of Result<Counter, exn>
-
+| SetScore   of Score
+| SetName    of string
+| SetComment of string
 
 module Server = 
 
@@ -39,22 +46,19 @@ module Server =
     
 
 let init () = 
-  let model = None
-  let cmd =
-    Cmd.ofAsync 
-      Server.api.getInitCounter
-      () 
-      (Ok >> Init)
-      (Error >> Init)
+  let model = 
+    { Score   = Good
+      Name    = ""
+      Comment = "" }
+  let cmd = Cmd.none
   model, cmd
 
 let update msg (model : Model) =
   let model' =
-    match model,  msg with
-    | Some x, Increment -> Some (x + 1)
-    | Some x, Decrement -> Some (x - 1)
-    | None, Init (Ok x) -> Some x
-    | _ -> None
+    match msg with
+    | SetScore   score   -> { model with Score   = score }
+    | SetName    name    -> { model with Name    = name  }
+    | SetComment comment -> { model with Comment = comment }
   model', Cmd.none
 
 let navBrand =
