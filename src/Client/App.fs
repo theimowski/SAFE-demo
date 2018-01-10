@@ -28,7 +28,7 @@ type Score =
 | Good
 
 type Model =
-  { Score   : Score 
+  { Score   : Score option
     Name    : string 
     Comment : string }
 
@@ -49,7 +49,7 @@ module Server =
 
 let init () = 
   let model = 
-    { Score   = Good
+    { Score   = None
       Name    = ""
       Comment = "" }
   let cmd = Cmd.none
@@ -58,7 +58,7 @@ let init () =
 let update msg (model : Model) =
   let model' =
     match msg with
-    | SetScore   score   -> { model with Score   = score }
+    | SetScore   score   -> { model with Score   = Some score }
     | SetName    name    -> { model with Name    = name  }
     | SetComment comment -> { model with Comment = comment }
   model', Cmd.none
@@ -99,6 +99,16 @@ let field input =
     [ Field.body [ ] 
         [ input ] ]
 
+let scoreIcon = function
+| Poor -> Fa.I.FrownO
+| SoSo -> Fa.I.MehO
+| Good -> Fa.I.SmileO
+
+let scoreColor = function
+| Poor -> Button.isDanger
+| SoSo -> Button.isWarning
+| Good -> Button.isSuccess
+
 let onInput action = OnInput (fun e -> action !!e.target?value) 
 
 let comment model dispatch =
@@ -116,7 +126,9 @@ let name model dispatch =
       Input.props [ onInput (SetName >> dispatch) ] ]
 
 let submit =
-  Button.button_a [ Button.isPrimary; Button.isFullWidth ] [ str "Submit" ]
+  Button.button_a 
+    [ Button.isPrimary
+      Button.isFullWidth ] [ str "Submit" ]
 
 let containerBox model dispatch =
   Box.box' [ ]
