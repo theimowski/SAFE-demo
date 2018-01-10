@@ -111,6 +111,27 @@ let scoreColor = function
 
 let onInput action = OnInput (fun e -> action !!e.target?value) 
 
+let score model dispatch =
+  let column score =
+    let icon  = scoreIcon score
+    let color = scoreColor score
+
+    Level.item [ ]
+      [ Button.button_a 
+          [ yield color
+            yield Button.props
+                    [ OnClick (fun _ -> dispatch (SetScore score)) ]
+            if model.Score <> Some score then
+              yield Button.isOutlined ] 
+          [ Icon.faIcon [ ]
+              [ Fa.icon icon
+                Fa.fa2x ] ] ]
+
+  Level.level [ Level.Level.isMobile ]
+    [ column Good 
+      column SoSo
+      column Poor ]
+
 let comment model dispatch =
   Textarea.textarea 
     [ Textarea.placeholder "Comment"
@@ -132,7 +153,8 @@ let submit =
 
 let containerBox model dispatch =
   Box.box' [ ]
-    [ field (comment model dispatch)
+    [ field (score model dispatch)
+      field (comment model dispatch)
       field (name model dispatch)
       field submit ]
 
