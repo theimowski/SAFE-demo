@@ -108,8 +108,12 @@ let comment model dispatch =
       Textarea.props [ onInput (SetComment >> dispatch) ] ]
     [ ]
 
-let name =
-  Input.input [ Input.typeIsText; Input.placeholder "Name" ]
+let name model dispatch =
+  Input.input 
+    [ Input.typeIsText
+      Input.placeholder "Name"
+      Input.value model.Name
+      Input.props [ onInput (SetName >> dispatch) ] ]
 
 let submit =
   Button.button_a [ Button.isPrimary; Button.isFullWidth ] [ str "Submit" ]
@@ -117,7 +121,7 @@ let submit =
 let containerBox model dispatch =
   Box.box' [ ]
     [ field (comment model dispatch)
-      field name
+      field (name model dispatch)
       field submit ]
 
 let imgSrc = "http://fsharp.org/img/logo/fsharp256.png"
