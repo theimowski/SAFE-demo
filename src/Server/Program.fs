@@ -18,14 +18,6 @@ let config =
       homeFolder = Some clientPath
       bindings = [ HttpBinding.create HTTP (IPAddress.Parse "0.0.0.0") port ] }
 
-let getInitCounter () : Async<Counter> = async { return 42 }
-
-let init : WebPart = 
-  let counterProcotol = 
-    { getInitCounter = getInitCounter }
-  // creates a WebPart for the given implementation
-  FableSuaveAdapter.webPartWithBuilderFor counterProcotol Route.builder
-
 let votes = ConcurrentBag<Vote>()
 
 let countVotes() =
@@ -58,7 +50,6 @@ let voting : WebPart =
 
 let webPart =
   choose [
-    init
     voting
     Files.browseHome
   ]
