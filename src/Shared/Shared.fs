@@ -7,6 +7,15 @@ type Score =
 | SoSo
 | Good
 
+type Vote =
+  { Score   : Score 
+    Name    : string 
+    Comment : string }
+
+type VotingResults =
+  { Scores   : Map<Score,int>
+    Comments : string [] }
+
 module Route =
   /// Defines how routes are generated on server and mapped from client
   let builder typeName methodName = 
@@ -17,3 +26,6 @@ module Route =
 /// Add more such fields, implement them on the server and they be directly available on client
 type ICounterProtocol =
   { getInitCounter : unit -> Async<Counter> }
+
+type IVotingProtocol =
+  { vote : Vote -> Async<VotingResults> }
