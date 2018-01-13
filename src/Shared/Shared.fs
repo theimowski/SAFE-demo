@@ -2,6 +2,11 @@ namespace Shared
 
 type Counter = int
 
+type Score =
+| Poor
+| SoSo
+| Good
+
 module Route =
   /// Defines how routes are generated on server and mapped from client
   let builder typeName methodName = 
