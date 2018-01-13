@@ -30,12 +30,14 @@ type Score =
 type Model =
   { Score   : Score option
     Name    : string 
-    Comment : string }
+    Comment : string
+    Loading : bool }
 
 type Msg =
 | SetScore   of Score
 | SetName    of string
 | SetComment of string
+| Submit
 
 module Server = 
 
@@ -51,7 +53,8 @@ let init () =
   let model = 
     { Score   = None
       Name    = ""
-      Comment = "" }
+      Comment = ""
+      Loading = false }
   let cmd = Cmd.none
   model, cmd
 
@@ -61,6 +64,7 @@ let update msg (model : Model) =
     | SetScore   score   -> { model with Score   = Some score }
     | SetName    name    -> { model with Name    = name  }
     | SetComment comment -> { model with Comment = comment }
+    | Submit             -> { model with Loading = true }
   model', Cmd.none
 
 let navBrand =
@@ -146,17 +150,21 @@ let name model dispatch =
       Input.value model.Name
       Input.props [ onInput (SetName >> dispatch) ] ]
 
-let submit =
+let submit model dispatch =
   Button.button_a 
-    [ Button.isPrimary
-      Button.isFullWidth ] [ str "Submit" ]
+    [ yield Button.isPrimary
+      yield Button.isFullWidth
+      yield Button.onClick (fun _ -> dispatch Submit)
+      if model.Loading then
+        yield Button.isLoading ]
+    [ str "Submit" ]
 
 let containerBox model dispatch =
   Box.box' [ ]
     [ field (score model dispatch)
       field (comment model dispatch)
       field (name model dispatch)
-      field submit ]
+      field (submit model dispatch) ]
 
 let imgSrc = "http://fsharp.org/img/logo/fsharp256.png"
 
