@@ -187,9 +187,35 @@ let formBox model dispatch =
       field (name model dispatch)
       field (submit model dispatch) ]
 
-let resultsBox model dispatch =
+let resultScore model =
+  let column score =
+    let icon  = scoreIcon score
+    let count = defaultArg (Map.tryFind score model.Scores) 0
+
+    Level.item [ ]
+      [ div [ ]
+          [ 
+            Icon.faIcon [ ]
+              [ Fa.icon icon
+                Fa.fa2x ] 
+            h2 [ ] 
+              [ str (string count) ] ] ]
+
+  Level.level [ Level.Level.isMobile ]
+    [ column Good 
+      column SoSo
+      column Poor ]
+
+let resultsBox results =
   Box.box' [ ]
-    [ ]
+    [ resultScore results ]
+
+let containerBox model dispatch =
+  match model.Results with
+  | None ->
+    formBox model dispatch
+  | Some results ->
+    resultsBox results
 
 let imgSrc = "http://fsharp.org/img/logo/fsharp256.png"
 
@@ -215,7 +241,7 @@ let view model dispatch =
                   div [ ClassName "subtitle" ]
                     [ str (if model.Results.IsSome then "Results"
                            else "Score my talk") ]
-                  formBox model dispatch ] ] ] ]
+                  containerBox model dispatch ] ] ] ]
 
   
 #if DEBUG
