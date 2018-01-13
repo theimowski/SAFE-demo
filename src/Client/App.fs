@@ -40,8 +40,8 @@ module Server =
   open Fable.Remoting.Client
   
   /// A proxy you can use to talk to server directly
-  let api : ICounterProtocol = 
-    Proxy.createWithBuilder<ICounterProtocol> Route.builder
+  let api : IVotingProtocol = 
+    Proxy.createWithBuilder<IVotingProtocol> Route.builder
     
 
 let init () = 
