@@ -187,10 +187,10 @@ let formBox model dispatch =
       field (name model dispatch)
       field (submit model dispatch) ]
 
-let resultScore model =
+let resultScore scores =
   let column score =
     let icon  = scoreIcon score
-    let count = defaultArg (Map.tryFind score model.Scores) 0
+    let count = defaultArg (Map.tryFind score scores) 0
 
     Level.item [ ]
       [ div [ ]
@@ -206,9 +206,16 @@ let resultScore model =
       column SoSo
       column Poor ]
 
+let resultComments comments =
+  Content.content [ Content.isSmall ]
+    [ ul [ ]
+        [ for comment in comments do
+          yield li [ ] [ str comment ] ] ]
+
 let resultsBox results =
   Box.box' [ ]
-    [ resultScore results ]
+    [ resultScore results.Scores
+      resultComments results.Comments ]
 
 let containerBox model dispatch =
   match model.Results with
