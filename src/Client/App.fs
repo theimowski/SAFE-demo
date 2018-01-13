@@ -57,7 +57,7 @@ let init () =
 let makeVote (model : Model) : Vote =
   { Score   = defaultArg model.Score Good
     Name    = model.Name
-    Comment = model.Name }
+    Comment = model.Comment }
 
 let update msg (model : Model) =
   let model' =
