@@ -33,6 +33,7 @@ type Msg =
 | SetName    of string
 | SetComment of string
 | Submit
+| GotResults of Result<VotingResults, exn>
 
 module Server = 
 
@@ -53,6 +54,11 @@ let init () =
   let cmd = Cmd.none
   model, cmd
 
+let makeVote (model : Model) : Vote =
+  { Score   = defaultArg model.Score Good
+    Name    = model.Name
+    Comment = model.Name }
+
 let update msg (model : Model) =
   let model' =
     match msg with
@@ -60,7 +66,18 @@ let update msg (model : Model) =
     | SetName    name    -> { model with Name    = name  }
     | SetComment comment -> { model with Comment = comment }
     | Submit             -> { model with Loading = true }
-  model', Cmd.none
+    | GotResults _       -> { model with Loading = false }
+  let cmd =
+    match msg with
+    | Submit -> 
+        Cmd.ofAsync
+          Server.api.vote
+          (makeVote model')
+          (Ok >> GotResults)
+          (Error >> GotResults)
+    | _ ->
+        Cmd.none
+  model', cmd
 
 let navBrand =
   Navbar.brand_div [ ] 
