@@ -26,7 +26,8 @@ type Model =
   { Score   : Score option
     Name    : string 
     Comment : string
-    Loading : bool }
+    Loading : bool
+    Results : VotingResults option }
 
 type Msg =
 | SetScore   of Score
@@ -50,7 +51,8 @@ let init () =
     { Score   = None
       Name    = ""
       Comment = ""
-      Loading = false }
+      Loading = false
+      Results = None }
   let cmd = Cmd.none
   model, cmd
 
@@ -62,11 +64,13 @@ let makeVote (model : Model) : Vote =
 let update msg (model : Model) =
   let model' =
     match msg with
-    | SetScore   score   -> { model with Score   = Some score }
-    | SetName    name    -> { model with Name    = name  }
-    | SetComment comment -> { model with Comment = comment }
-    | Submit             -> { model with Loading = true }
-    | GotResults _       -> { model with Loading = false }
+    | SetScore   score     -> { model with Score   = Some score }
+    | SetName    name      -> { model with Name    = name  }
+    | SetComment comment   -> { model with Comment = comment }
+    | Submit               -> { model with Loading = true }
+    | GotResults (Ok r)    -> { model with Loading = false
+                                           Results = Some r }
+    | GotResults (Error _) -> { model with Loading = false }
   let cmd =
     match msg with
     | Submit -> 
@@ -176,12 +180,16 @@ let submit model dispatch =
         yield Button.isLoading ]
     [ str "Submit" ]
 
-let containerBox model dispatch =
+let formBox model dispatch =
   Box.box' [ ]
     [ field (score model dispatch)
       field (comment model dispatch)
       field (name model dispatch)
       field (submit model dispatch) ]
+
+let resultsBox model dispatch =
+  Box.box' [ ]
+    [ ]
 
 let imgSrc = "http://fsharp.org/img/logo/fsharp256.png"
 
@@ -205,8 +213,9 @@ let view model dispatch =
                   h1 [ ClassName "title" ] 
                     [ str "SAFE Demo" ]
                   div [ ClassName "subtitle" ]
-                    [ str "Score my talk" ]
-                  containerBox model dispatch ] ] ] ]
+                    [ str (if model.Results.IsSome then "Results"
+                           else "Score my talk") ]
+                  formBox model dispatch ] ] ] ]
 
   
 #if DEBUG
