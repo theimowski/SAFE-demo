@@ -21,6 +21,7 @@ let yarnTool = platformTool "yarn" "yarn.cmd"
 let dotnetcliVersion = DotNetCli.GetDotNetSDKVersionFromGlobalJson()
 let mutable dotnetCli = "dotnet"
 
+
 let run cmd args workingDir =
   let result =
     ExecProcess (fun info ->
@@ -84,6 +85,19 @@ Target "Bundle" (fun _ ->
   !! "src/Client/index.html"
   ++ "src/Client/landing.css"
   |> CopyFiles clientDir
+)
+
+Target "Docker" (fun _ ->
+  let dockerUser = environVar "DOCKER_HUB_USER"
+  let dockerImageName = "safe-demo"
+
+  let fullName = sprintf "%s/%s" dockerUser dockerImageName
+
+  let buildArgs = sprintf "build -t %s ." fullName
+  run "docker" buildArgs "."
+
+  let tagArgs = sprintf "tag %s %s" fullName fullName
+  run "docker" tagArgs "."
 )
 
 "Clean"
