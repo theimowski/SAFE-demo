@@ -105,6 +105,7 @@ Target "Docker" (fun _ ->
   ==> "InstallClient"
   ==> "Build"
   ==> "Bundle"
+  ==> "Docker"
 
 "InstallClient"
   ==> "RestoreServer"
