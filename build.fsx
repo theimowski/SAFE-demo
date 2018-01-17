@@ -88,7 +88,7 @@ Target "Bundle" (fun _ ->
 )
 
 let dockerUser = environVar "DOCKER_HUB_USER"
-let dockerImageName = "safe-demo"
+let dockerImageName = "safe-demo4"
 let dockerFullName = sprintf "%s/%s" dockerUser dockerImageName
 
 Target "Docker" (fun _ ->
@@ -109,7 +109,7 @@ Target "Deploy" (fun _ ->
   ==> "InstallClient"
   ==> "Build"
   ==> "Bundle"
-  ==> "Docker"
+  //==> "Docker"
 
 "InstallClient"
   ==> "RestoreServer"

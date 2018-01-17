@@ -52,6 +52,7 @@ let voting : WebPart =
 let webPart =
   choose [
     voting
+    Filters.path "/" >=> Files.browseFileHome "index.html"
     Files.browseHome
   ]
 
