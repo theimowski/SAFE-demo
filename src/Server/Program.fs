@@ -54,6 +54,7 @@ let webPart =
     voting
     Filters.path "/" >=> Files.browseFileHome "index.html"
     Files.browseHome
+    RequestErrors.NOT_FOUND "Page not found."
   ]
 
 startWebServer config webPart
