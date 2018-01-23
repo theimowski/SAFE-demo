@@ -118,8 +118,11 @@ let scores model dispatch =
 
     Level.item [ ]
       [ Button.button_a
-          [ color
-            Button.isOutlined ]
+          [ yield color
+            yield Button.props 
+                    [ OnClick (fun _ -> dispatch (SetScore score)) ]
+            if model.Score <> Some score then
+              yield Button.isOutlined ]
           [ Icon.faIcon [ ]
               [ Fa.icon icon
                 Fa.fa2x ] ] ]
