@@ -93,22 +93,7 @@ let navMenu =
 
 let containerBox model dispatch =
   Box.box' [ ]
-    [ Form.Field.field_div [ Form.Field.isGrouped ] 
-        [ Form.Control.control_p [ Form.Control.customClass "is-expanded"] 
-            [ Form.Input.input
-                [ Form.Input.typeIsNumber
-                  Form.Input.disabled true
-                  Form.Input.value (show model) ] ]
-          Form.Control.control_p [ ]
-            [ Button.button_a 
-                [ Button.isPrimary
-                  Button.onClick (fun _ -> dispatch Increment) ]
-                [ str "+" ] ]
-          Form.Control.control_p [ ]
-            [ Button.button_a 
-                [ Button.isPrimary
-                  Button.onClick (fun _ -> dispatch Decrement) ]
-                [ str "-" ] ] ] ]
+    [  ]
 
 let imgSrc = "https://crossweb.pl/upload/gallery/cycles/11255/300x300/lambda_days.png"
 
