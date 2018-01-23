@@ -107,9 +107,9 @@ let scoreColor = function
 | Poor -> Button.isDanger
 
 let scoreIcon = function
-| Good -> Fa.I.SmileO
+| Good -> Fa.I.Odnoklassniki
 | SoSo -> Fa.I.MehO
-| Poor -> Fa.I.FrownO
+| Poor -> Fa.I.Fire
 
 let scores model dispatch =
   let column score =
