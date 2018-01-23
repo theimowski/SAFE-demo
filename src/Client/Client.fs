@@ -101,14 +101,27 @@ let field input =
 
 let onInput action = OnInput (fun e -> action !!e.target?value)
 
+let scoreColor = function
+| Good -> Button.isSuccess
+| SoSo -> Button.isWarning
+| Poor -> Button.isDanger
+
+let scoreIcon = function
+| Good -> Fa.I.SmileO
+| SoSo -> Fa.I.MehO
+| Poor -> Fa.I.FrownO
+
 let scores model dispatch =
   let column score =
+    let color = scoreColor score
+    let icon  = scoreIcon score
+
     Level.item [ ]
       [ Button.button_a
-          [ Button.isSuccess
+          [ color
             Button.isOutlined ]
           [ Icon.faIcon [ ]
-              [ Fa.icon Fa.I.SmileO
+              [ Fa.icon icon
                 Fa.fa2x ] ] ]
 
   Level.level [ Level.Level.isMobile ]
