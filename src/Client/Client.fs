@@ -57,10 +57,6 @@ let update msg (model : Model) =
     | _ -> None
   model', Cmd.none
 
-let show = function
-| Some x -> string x
-| None -> "Loading..."
-
 let navBrand =
   Navbar.brand_div [ ] 
     [ Navbar.item_a 
