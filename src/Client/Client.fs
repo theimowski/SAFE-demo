@@ -97,9 +97,12 @@ let field input =
     [ Field.body [ ]
         [ input ] ]
 
+let comment =
+  Textarea.textarea [ Textarea.placeholder "Comment" ] [ ]
+
 let containerBox model dispatch =
   Box.box' [ ]
-    [  ]
+    [ field comment ]
 
 let imgSrc = "https://crossweb.pl/upload/gallery/cycles/11255/300x300/lambda_days.png"
 
