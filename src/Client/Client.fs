@@ -56,30 +56,6 @@ let update msg (model : Model) =
     | _ -> None
   model', Cmd.none
 
-let safeComponents =
-  let intersperse sep ls =
-    List.foldBack (fun x -> function
-      | [] -> [x]
-      | xs -> x::sep::xs) ls []
-
-  let components =
-    [
-      "Suave", "http://suave.io"
-      "Fable", "http://fable.io"
-      "Elmish", "https://fable-elmish.github.io/"
-      "Fulma", "https://mangelmaxime.github.io/Fulma" 
-      "Bulma\u00A0Templates", "https://dansup.github.io/bulma-templates/"
-      "Fable.Remoting", "https://github.com/Zaid-Ajaj/Fable.Remoting"
-    ]
-    |> List.map (fun (desc,link) -> a [ Href link ] [ str desc ] )
-    |> intersperse (str ", ")
-    |> span [ ]
-
-  p [ ]
-    [ strong [] [ str "SAFE Template" ]
-      str " powered by: "
-      components ]
-
 let show = function
 | Some x -> string x
 | None -> "Loading..."
@@ -148,9 +124,9 @@ let view model dispatch =
                 [ Column.Width.is6
                   Column.Offset.is3 ]
                 [ h1 [ ClassName "title" ] 
-                    [ str "SAFE Template" ]
+                    [ str "SAFE Demo" ]
                   div [ ClassName "subtitle" ]
-                    [ safeComponents ]
+                    [ str "Score my talk" ]
                   containerBox model dispatch ] ] ] ]
 
   
