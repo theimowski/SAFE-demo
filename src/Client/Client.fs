@@ -110,6 +110,8 @@ let containerBox model dispatch =
                   Button.onClick (fun _ -> dispatch Decrement) ]
                 [ str "-" ] ] ] ]
 
+let imgSrc = "https://crossweb.pl/upload/gallery/cycles/11255/300x300/lambda_days.png"
+
 let view model dispatch =
   Hero.hero [ Hero.isPrimary; Hero.isFullHeight ] 
     [ Hero.head [ ] 
@@ -123,10 +125,15 @@ let view model dispatch =
             [ Column.column 
                 [ Column.Width.is6
                   Column.Offset.is3 ]
-                [ h1 [ ClassName "title" ] 
+                [ Level.level [ ]
+                    [ Level.item [ ] 
+                        [ Image.image [ Image.is64x64 ]
+                            [ img [ Src imgSrc ] ] ] ]
+                  
+                  h1 [ ClassName "title" ] 
                     [ str "SAFE Demo" ]
                   div [ ClassName "subtitle" ]
-                    [ str "Score my talk" ]
+                    [ str "Score my talk @ Lambda Days" ]
                   containerBox model dispatch ] ] ] ]
 
   
