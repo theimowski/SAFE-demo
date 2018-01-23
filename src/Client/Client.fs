@@ -101,6 +101,19 @@ let field input =
 
 let onInput action = OnInput (fun e -> action !!e.target?value)
 
+let scores model dispatch =
+  let column score =
+    Level.item [ ]
+      [ Button.button_a
+          [ ]
+          [ Icon.faIcon [ ]
+              [ Fa.icon Fa.I.SmileO ] ] ]
+
+  Level.level [ Level.Level.isMobile ]
+    [ column Good
+      column SoSo
+      column Poor ]
+
 let comment model dispatch =
   Textarea.textarea 
     [ Textarea.placeholder "Comment"
@@ -123,7 +136,8 @@ let submit =
 
 let containerBox model dispatch =
   Box.box' [ ]
-    [ field (comment model dispatch)
+    [ field (scores model dispatch)
+      field (comment model dispatch)
       field (name model dispatch)
       field submit ]
 
