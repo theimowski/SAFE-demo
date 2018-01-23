@@ -7,6 +7,8 @@ open Fable.Helpers.React
 open Fable.Helpers.React.Props
 open Fable.PowerPack.Fetch
 
+open Fable.Core.JsInterop
+
 open Shared
 
 open Fulma
@@ -97,8 +99,14 @@ let field input =
     [ Field.body [ ]
         [ input ] ]
 
-let comment =
-  Textarea.textarea [ Textarea.placeholder "Comment" ] [ ]
+let onInput action = OnInput (fun e -> action !!e.target?value)
+
+let comment model dispatch =
+  Textarea.textarea 
+    [ Textarea.placeholder "Comment"
+      Textarea.value model.Comment
+      Textarea.props [ onInput (SetComment >> dispatch) ] ] 
+    [ ]
 
 let name =
   Input.input [ Input.typeIsText; Input.placeholder "Name" ]
@@ -111,7 +119,7 @@ let submit =
 
 let containerBox model dispatch =
   Box.box' [ ]
-    [ field comment
+    [ field (comment model dispatch)
       field name
       field submit ]
 
