@@ -105,9 +105,11 @@ let scores model dispatch =
   let column score =
     Level.item [ ]
       [ Button.button_a
-          [ ]
+          [ Button.isSuccess
+            Button.isOutlined ]
           [ Icon.faIcon [ ]
-              [ Fa.icon Fa.I.SmileO ] ] ]
+              [ Fa.icon Fa.I.SmileO
+                Fa.fa2x ] ] ]
 
   Level.level [ Level.Level.isMobile ]
     [ column Good
