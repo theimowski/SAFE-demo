@@ -28,7 +28,7 @@ type Score =
 | Good
 
 type Model =
-  { Score   : Score 
+  { Score   : Score option
     Name    : string 
     Comment : string }
 
@@ -49,7 +49,7 @@ module Server =
 
 let init () = 
   let model =
-    { Score   = Good 
+    { Score   = None
       Name    = ""
       Comment = "" }
   let cmd = Cmd.none
@@ -60,7 +60,7 @@ let update msg (model : Model) =
     match msg with
     | SetComment comment -> { model with Comment = comment }
     | SetName    name    -> { model with Name    = name  }
-    | SetScore   score   -> { model with Score   = score }
+    | SetScore   score   -> { model with Score   = Some score }
   model', Cmd.none
 
 let navBrand =
