@@ -12,6 +12,7 @@ open Shared
 open Fulma
 open Fulma.Layouts
 open Fulma.Elements
+open Fulma.Elements.Form
 open Fulma.Components
 open Fulma.BulmaClasses
 
@@ -90,6 +91,11 @@ let navMenu =
                 [ Icon.faIcon [ ] 
                     [ Fa.icon Fa.I.Github; Fa.fw ]
                   span [ ] [ str "View Source" ] ] ] ] ]
+
+let field input =
+  Field.field_div [ ]
+    [ Field.body [ ]
+        [ input ] ]
 
 let containerBox model dispatch =
   Box.box' [ ]
