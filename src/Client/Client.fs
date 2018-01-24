@@ -123,8 +123,8 @@ let scores model dispatch =
     Level.item [ ]
       [ Button.button_a
           [ yield color
-            yield Button.props 
-                    [ OnClick (fun _ -> dispatch (SetScore score)) ]
+            yield Button.onClick (fun _ ->
+              if not model.Loading then dispatch (SetScore score))
             if model.Loading then
               yield Button.isDisabled
             if model.Score <> Some score then
@@ -159,7 +159,8 @@ let submit model dispatch =
   Button.button_a 
     [ yield Button.isPrimary
       yield Button.isFullWidth
-      yield Button.onClick (fun _ -> dispatch Submit)
+      yield Button.onClick (fun _ -> 
+        if not model.Loading then dispatch Submit)
       if model.Loading then
         yield Button.isLoading ] 
     [ str "Submit" ]
