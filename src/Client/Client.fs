@@ -26,7 +26,8 @@ type Model =
   { Score   : Score option
     Name    : string 
     Comment : string
-    Loading : bool }
+    Loading : bool
+    Results : VotingResults option }
 
 type Msg =
 | SetComment of string
@@ -50,7 +51,8 @@ let init () =
     { Score   = None
       Name    = ""
       Comment = ""
-      Loading = false }
+      Loading = false
+      Results = None }
   let cmd = Cmd.none
   model, cmd
 
@@ -62,11 +64,13 @@ let mkVote (model : Model) : Vote =
 let update msg (model : Model) =
   let model' =
     match msg with
-    | SetComment comment -> { model with Comment = comment }
-    | SetName    name    -> { model with Name    = name  }
-    | SetScore   score   -> { model with Score   = Some score }
-    | Submit             -> { model with Loading = true }
-    | GotResults _       -> { model with Loading = false }
+    | SetComment comment   -> { model with Comment = comment }
+    | SetName    name      -> { model with Name    = name  }
+    | SetScore   score     -> { model with Score   = Some score }
+    | Submit               -> { model with Loading = true }
+    | GotResults (Ok r)    -> { model with Loading = false
+                                           Results = Some r }
+    | GotResults (Error _) -> { model with Loading = false }
   let cmd =
     match msg with
     | Submit ->
@@ -177,12 +181,23 @@ let submit model dispatch =
         yield Button.isLoading ] 
     [ str "Submit" ]
 
-let containerBox model dispatch =
+let formBox model dispatch =
   Box.box' [ ]
     [ field (scores model dispatch)
       field (comment model dispatch)
       field (name model dispatch)
       field (submit model dispatch) ]
+
+let resultsBox =
+  Box.box' [ ]
+    [ ]
+
+let containerBox model dispatch =
+  match model.Results with
+  | Some results ->
+    resultsBox
+  | None ->
+    formBox model dispatch
 
 let imgSrc = "https://crossweb.pl/upload/gallery/cycles/11255/300x300/lambda_days.png"
 
@@ -207,7 +222,8 @@ let view model dispatch =
                   h1 [ ClassName "title" ] 
                     [ str "SAFE Demo" ]
                   div [ ClassName "subtitle" ]
-                    [ str "Score my talk @ Lambda Days" ]
+                    [ str (if model.Results.IsSome then "Results"
+                           else "Score my talk @ Lambda Days") ]
                   containerBox model dispatch ] ] ] ]
 
   
