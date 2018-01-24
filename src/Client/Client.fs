@@ -22,11 +22,6 @@ open Fulma.BulmaClasses.Bulma
 open Fulma.BulmaClasses.Bulma.Properties
 open Fulma.Extra.FontAwesome
 
-type Score =
-| Poor
-| SoSo
-| Good
-
 type Model =
   { Score   : Score option
     Name    : string 

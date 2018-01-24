@@ -1,5 +1,10 @@
 namespace Shared
 
+type Score =
+| Poor
+| SoSo
+| Good
+
 type Counter = int
 
 module Route =
