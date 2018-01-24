@@ -5,6 +5,15 @@ type Score =
 | SoSo
 | Good
 
+type Vote =
+  { Comment : string 
+    Name    : string 
+    Score   : string }
+
+type VotingResults =
+  { Comments : string []
+    Scores : Map<Score, int> }
+
 type Counter = int
 
 module Route =
@@ -17,3 +26,6 @@ module Route =
 /// Add more such fields, implement them on the server and they be directly available on client
 type ICounterProtocol =
   { getInitCounter : unit -> Async<Counter> }
+
+type IVotingProtocol =
+  { vote : Vote -> Async<VotingResults> }
