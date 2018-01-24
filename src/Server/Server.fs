@@ -47,17 +47,8 @@ let voting : WebPart =
     { vote = vote }
   FableSuaveAdapter.webPartWithBuilderFor protocol Route.builder
 
-let getInitCounter () : Async<Counter> = async { return 42 }
-
-let init : WebPart = 
-  let counterProcotol = 
-    { getInitCounter = getInitCounter }
-  // creates a WebPart for the given implementation
-  FableSuaveAdapter.webPartWithBuilderFor counterProcotol Route.builder
-
 let webPart =
   choose [
-    init
     voting
     Filters.path "/" >=> Files.browseFileHome "index.html"
     Files.browseHome
