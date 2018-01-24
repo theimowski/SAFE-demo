@@ -205,7 +205,11 @@ let resultsBox (results : VotingResults) =
     [ Level.level [ Level.Level.isMobile ]
         [ column Good
           column SoSo
-          column Poor ] ]
+          column Poor ]
+      Content.content [ Content.isSmall ]
+        [ ol [ ]
+            [ for comment in results.Comments ->
+                li [ ] [ str comment ] ] ] ]
 
 let containerBox model dispatch =
   match model.Results with

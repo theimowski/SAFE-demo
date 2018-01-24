@@ -32,6 +32,7 @@ let countVotes() : VotingResults =
   let comments =
     votes
     |> Array.map (fun vote -> vote.Comment)
+    |> Array.filter ((<>) "")
 
   { Comments = comments 
     Scores   = scores }
