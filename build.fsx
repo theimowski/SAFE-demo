@@ -6,6 +6,7 @@ open Fake
 
 let serverPath = "./src/Server" |> FullName
 let clientPath = "./src/Client" |> FullName
+let deployDir = "./deploy" |> FullName
 
 let platformTool tool winTool =
   let tool = if isUnix then tool else winTool
@@ -27,7 +28,7 @@ let run cmd args workingDir =
       info.Arguments <- args) TimeSpan.MaxValue
   if result <> 0 then failwithf "'%s %s' failed" cmd args
 
-Target "Clean" DoNothing
+Target "Clean" (fun _ -> CleanDirs [deployDir])
 
 Target "InstallDotNetCore" (fun _ ->
   dotnetCli <- DotNetCli.InstallDotNetSDK dotnetcliVersion
@@ -69,10 +70,26 @@ Target "Run" (fun () ->
   |> ignore
 )
 
+Target "Bundle" (fun _ ->
+  let serverDir = deployDir </> "Server"
+  let clientDir = deployDir </> "Client"
+  let publicDir = deployDir </> "public"
+
+  let publishArgs = sprintf "publish -c Release -o \"%s\"" serverDir
+  run dotnetCli publishArgs serverPath
+
+  !! "src/Client/public/**/*.*" |> CopyFiles publicDir
+
+  !! "src/Client/index.html"
+  ++ "src/Client/landing.css"
+  |> CopyFiles clientDir 
+)
+
 "Clean"
   ==> "InstallDotNetCore"
   ==> "InstallClient"
   ==> "Build"
+  ==> "Bundle"
 
 "InstallClient"
   ==> "RestoreServer"
