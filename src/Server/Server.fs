@@ -39,6 +39,7 @@ let countVotes() : VotingResults =
 let vote (v : Vote) : Async<VotingResults> = 
   async {
     do votes.Add v
+    do! Async.Sleep 1000
     return countVotes()
   }
 
