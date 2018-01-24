@@ -8,7 +8,7 @@ type Score =
 type Vote =
   { Comment : string 
     Name    : string 
-    Score   : string }
+    Score   : Score }
 
 type VotingResults =
   { Comments : string []
