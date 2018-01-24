@@ -33,6 +33,7 @@ type Msg =
 | SetName    of string
 | SetScore   of Score
 | Submit
+| GotResults of Result<VotingResults, exn>
 
 module Server = 
 
@@ -40,9 +41,9 @@ module Server =
   open Fable.Remoting.Client
   
   /// A proxy you can use to talk to server directly
-  let api : ICounterProtocol = 
-    Proxy.createWithBuilder<ICounterProtocol> Route.builder
-    
+  let api : IVotingProtocol = 
+    Proxy.createWithBuilder<IVotingProtocol> Route.builder
+
 
 let init () = 
   let model =
@@ -53,6 +54,11 @@ let init () =
   let cmd = Cmd.none
   model, cmd
 
+let mkVote (model : Model) : Vote =
+  { Comment = model.Comment
+    Name    = model.Name 
+    Score   = defaultArg model.Score Good }
+
 let update msg (model : Model) =
   let model' =
     match msg with
@@ -60,7 +66,18 @@ let update msg (model : Model) =
     | SetName    name    -> { model with Name    = name  }
     | SetScore   score   -> { model with Score   = Some score }
     | Submit             -> { model with Loading = true }
-  model', Cmd.none
+    | GotResults _       -> { model with Loading = false }
+  let cmd =
+    match msg with
+    | Submit ->
+      Cmd.ofAsync
+        Server.api.vote
+        (mkVote model')
+        (Ok >> GotResults)
+        (Error >> GotResults)
+    | _ ->
+      Cmd.none
+  model', cmd
 
 let navBrand =
   Navbar.brand_div [ ] 
