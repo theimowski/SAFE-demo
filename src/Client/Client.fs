@@ -191,12 +191,15 @@ let formBox model dispatch =
 let resultsBox (results : VotingResults) =
   let column score =
     let icon  = scoreIcon score
+    let count = defaultArg (Map.tryFind score results.Scores) 0
 
     Level.item [ ]
       [ div [] 
           [ Icon.faIcon [ ]
               [ Fa.icon icon
-                Fa.fa2x ] ] ]
+                Fa.fa2x ]
+            h2 [ ]
+              [ str (string count)] ] ]
 
   Box.box' [ ]
     [ Level.level [ Level.Level.isMobile ]
