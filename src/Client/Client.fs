@@ -188,14 +188,26 @@ let formBox model dispatch =
       field (name model dispatch)
       field (submit model dispatch) ]
 
-let resultsBox =
+let resultsBox (results : VotingResults) =
+  let column score =
+    let icon  = scoreIcon score
+
+    Level.item [ ]
+      [ div [] 
+          [ Icon.faIcon [ ]
+              [ Fa.icon icon
+                Fa.fa2x ] ] ]
+
   Box.box' [ ]
-    [ ]
+    [ Level.level [ Level.Level.isMobile ]
+        [ column Good
+          column SoSo
+          column Poor ] ]
 
 let containerBox model dispatch =
   match model.Results with
   | Some results ->
-    resultsBox
+    resultsBox results
   | None ->
     formBox model dispatch
 
