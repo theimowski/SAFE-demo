@@ -30,12 +30,14 @@ type Score =
 type Model =
   { Score   : Score option
     Name    : string 
-    Comment : string }
+    Comment : string
+    Loading : bool }
 
 type Msg =
 | SetComment of string
 | SetName    of string
 | SetScore   of Score
+| Submit
 
 module Server = 
 
@@ -51,7 +53,8 @@ let init () =
   let model =
     { Score   = None
       Name    = ""
-      Comment = "" }
+      Comment = ""
+      Loading = false }
   let cmd = Cmd.none
   model, cmd
 
@@ -61,6 +64,7 @@ let update msg (model : Model) =
     | SetComment comment -> { model with Comment = comment }
     | SetName    name    -> { model with Name    = name  }
     | SetScore   score   -> { model with Score   = Some score }
+    | Submit             -> { model with Loading = true }
   model', Cmd.none
 
 let navBrand =
@@ -146,10 +150,13 @@ let name model dispatch =
       Input.value model.Name
       Input.props [ onInput (SetName >> dispatch) ] ]
 
-let submit =
+let submit model dispatch =
   Button.button_a 
-    [ Button.isPrimary
-      Button.isFullWidth ] 
+    [ yield Button.isPrimary
+      yield Button.isFullWidth
+      yield Button.onClick (fun _ -> dispatch Submit)
+      if model.Loading then
+        yield Button.isLoading ] 
     [ str "Submit" ]
 
 let containerBox model dispatch =
@@ -157,7 +164,7 @@ let containerBox model dispatch =
     [ field (scores model dispatch)
       field (comment model dispatch)
       field (name model dispatch)
-      field submit ]
+      field (submit model dispatch) ]
 
 let imgSrc = "https://crossweb.pl/upload/gallery/cycles/11255/300x300/lambda_days.png"
 
