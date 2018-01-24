@@ -125,6 +125,8 @@ let scores model dispatch =
           [ yield color
             yield Button.props 
                     [ OnClick (fun _ -> dispatch (SetScore score)) ]
+            if model.Loading then
+              yield Button.isDisabled
             if model.Score <> Some score then
               yield Button.isOutlined ]
           [ Icon.faIcon [ ]
@@ -138,9 +140,11 @@ let scores model dispatch =
 
 let comment model dispatch =
   Textarea.textarea 
-    [ Textarea.placeholder "Comment"
-      Textarea.value model.Comment
-      Textarea.props [ onInput (SetComment >> dispatch) ] ] 
+    [ yield Textarea.placeholder "Comment"
+      yield Textarea.value model.Comment
+      if model.Loading then
+        yield Textarea.isDisabled
+      yield Textarea.props [ onInput (SetComment >> dispatch) ] ] 
     [ ]
 
 let name model dispatch =
@@ -148,6 +152,7 @@ let name model dispatch =
     [ Input.typeIsText
       Input.placeholder "Name"
       Input.value model.Name
+      Input.disabled model.Loading
       Input.props [ onInput (SetName >> dispatch) ] ]
 
 let submit model dispatch =
