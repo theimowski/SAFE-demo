@@ -73,7 +73,8 @@ Target "Run" (fun () ->
 Target "Bundle" (fun _ ->
   let serverDir = deployDir </> "Server"
   let clientDir = deployDir </> "Client"
-  let publicDir = deployDir </> "public"
+  
+  let publicDir = clientDir </> "public"
 
   let publishArgs = sprintf "publish -c Release -o \"%s\"" serverDir
   run dotnetCli publishArgs serverPath
@@ -85,11 +86,26 @@ Target "Bundle" (fun _ ->
   |> CopyFiles clientDir 
 )
 
+Target "Docker" (fun _ ->
+  let dockerUser = environVar "DOCKER_HUB_USER"
+  let dockerImageName = "safe-demo"
+
+  let fullName = sprintf "%s/%s" dockerUser dockerImageName
+  let buildArgs = sprintf "build -t %s ." fullName
+
+  run "docker" buildArgs "."
+
+  let tagArgs = sprintf "tag %s %s" fullName fullName
+  
+  run "docker" tagArgs "."
+)
+
 "Clean"
   ==> "InstallDotNetCore"
   ==> "InstallClient"
   ==> "Build"
   ==> "Bundle"
+  ==> "Docker"
 
 "InstallClient"
   ==> "RestoreServer"
