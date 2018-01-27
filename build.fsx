@@ -86,18 +86,24 @@ Target "Bundle" (fun _ ->
   |> CopyFiles clientDir 
 )
 
-Target "Docker" (fun _ ->
-  let dockerUser = environVar "DOCKER_HUB_USER"
-  let dockerImageName = "safe-demo"
+let dockerUser = environVar "DOCKER_HUB_USER"
+let dockerImageName = "safe-demo"
 
-  let fullName = sprintf "%s/%s" dockerUser dockerImageName
-  let buildArgs = sprintf "build -t %s ." fullName
+let dockerFullName = sprintf "%s/%s" dockerUser dockerImageName
+
+Target "Docker" (fun _ ->
+  let buildArgs = sprintf "build -t %s ." dockerFullName
 
   run "docker" buildArgs "."
 
-  let tagArgs = sprintf "tag %s %s" fullName fullName
+  let tagArgs = sprintf "tag %s %s" dockerFullName dockerFullName
   
   run "docker" tagArgs "."
+)
+
+Target "Deploy" (fun _ -> 
+  let pushArgs = sprintf "push %s" dockerFullName
+  run "docker" pushArgs "."
 )
 
 "Clean"
